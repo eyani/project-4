@@ -2,6 +2,7 @@
  * Project 4 - OOP Game App
  * app.js */
 
+ //selecting btn_reset and storing it in the constant startGameButton
 const startGameButton = document.getElementById("btn__reset");
 const game = new Game();
 
@@ -10,6 +11,7 @@ const game = new Game();
 startGameButton.addEventListener('click', () => {
     game.startGame();
     game.resetGame();
+    
 });
 
 // Click event listener for every keyboard key
