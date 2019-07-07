@@ -5,7 +5,7 @@ class Game {
     constructor() {
         this.missed = 0;
          this.phrases = this.createPhrases();
-        this.activePhrase = this.getRandomPhrase();
+        this.activePhrase = null ;
         }
         
         createPhrases(){
@@ -67,7 +67,7 @@ class Game {
 
             // 1 heart for hard
             case "hard":   
-                return 1;
+                return 2;
         }
     }
 
@@ -78,14 +78,34 @@ class Game {
         this.activePhrase = this.getRandomPhrase();
         this.activePhrase.addPhraseToDisplay();
         this.resetGame();
-    }
+
+
+        this.missed = 0;
+
+            // Clear overlay game over text
+            $("#overlay #game-over-message")
+                .text("");
+
+            // Remove all hearts
+            $("#scoreboard li")
+                .remove()
+
+
+        for (let i = 0; i < this.totalHearts; i++) {
+            const $heartImage = $("<img />", {
+                src: "images/liveHeart.png",
+                alt: "Heart Icon",
+                height: 35,
+                width: 30,
+            });
+
+            $("<li>", { class: "tries" })
+                .append($heartImage)
+                .appendTo("#scoreboard ol");
+        }
 
 
 
-    static showMatchedLetter(letter) {
-        $(`#phrase .${letter}`)     
-            .removeClass("hide")    
-            .addClass("show")      
     }
 
 
@@ -96,37 +116,56 @@ class Game {
 
             let letter = letterButton.textContent
             letterButton.disabled = true;
-            
+                       
             if (!game.activePhrase.checkLetter(letter)) {
                 letterButton.className = ('wrong');
                 this.removeLife();
             } else {
                 letterButton.className = ('chosen');
-                game.activePhrase = Phrase.showMatchedLetter(letter);
+                // game.activePhrase = Phrase.showMatchedLetter(letter);
+                Phrase.showMatchedLetter(letter);
                 this.checkForWin();     
             }
+
+           
+
+            
         } 
-        //checking if the user won
-        if (this.checkForWin() == true) { 
-            //passing true on the gameover method
-            this.gameOver(true); 
-        } 
-        
+    
+        let keyPressed = [];
+        $(document).keypress( (e) => {
+            let keyPress = e.key;
+            if ( !keyPressed.includes(keyPress) ) {
+              $('.key').each( (index, key) => {
+                if ( $(key).text() === keyPress ) {
+                  game.handleInteraction(key);
+                }
+              });
+              keyPressed.push(keyPress);
+            }
+          });
          
     }
-    //adding a boolen to the checkforwin method
+
+
     checkForWin() {
-    const hideLetters = document.getElementsByClassName('hide').length;
-        if (!hideLetters) {
-            return true;
-        } else {
-            return false;
-            }
-        }
+        // Check if there are no more letters hidden
+        const hideLetters = $("#phrase .letter.hide").length === 0;
+
+        // If the player has won, end the game with a "win" result
+        if (hideLetters)
+        setTimeout(() => {
+                        
+            this.gameOver(true);
+        }, 3000)
+           // this.gameOver(true);
+    }
+
+
+
+
     //method for removing life on losses. 
-
-
-    removeLife() {
+     removeLife() {
         // Increment miss counter
         this.missed += 1;
 
@@ -150,21 +189,25 @@ class Game {
                     setTimeout(() => {
                         
                         this.gameOver("lose");
-                    }, 5000)
+                    }, 3000)
                 }
+                
             
     }
+    
 
-    gameOver(wonGame){
+    gameOver(gameWon){
         document.getElementById('overlay').style.display = 'flex';
-        if(wonGame === true){
+        if(gameWon === true){
             document.getElementById('game-over-message').innerText = 'You won!';
             document.getElementById('overlay').className = 'win';
-            document.getElementById("btn__reset").textContent = "Play again";
+            document.getElementById("btn__reset").textContent= "Play again";
+           
         } else {
             document.getElementById('game-over-message').innerText = "Sorry you lost";
             document.getElementById('overlay').className = 'lose';
             document.getElementById("btn__reset").textContent = "Try again";
+           
         }
     }
 
